@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9">   
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+  <title>Basemap Tour</title>
+  <link rel="shortcut icon" href="//esri.github.io/quickstart-map-js/images/favicon.ico">
+  <!-- ArcGIS API for JavaScript CSS-->
+  <link rel="stylesheet" href="//js.arcgis.com/3.10/js/esri/css/esri.css">
+  <!-- Web Framework CSS - Bootstrap (getbootstrap.com) and Bootstrap-map-js (github.com/esri/bootstrap-map-js) -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="//esri.github.io/bootstrap-map-js/src/css/bootstrapmap.css">
+  <style>
+    html, body, #mapDiv {
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <!-- ArcGIS API for JavaScript library references -->
+  <script src="//js.arcgis.com/3.10compact"></script>
+  <script>
+    define("model",[],function () {
+      var mapLocations = init();
+      function init() {
+        // Setup map locations
+        var basemaps = [
+          ["gray",[-100,45],3], // World
+          ["streets",[-0.13,51.50],11], // London
+          ["hybrid",[151.21,-33.87],14], // Sydney
+          ["topo",[-77.017,38.943],17], // D.C.
+          ["national-geographic",[-84.0,10],9], // Costa Rica        
+          ["oceans",[-40,30],4], // Atlantic   
+          ["gray",[135,-25],4], // Australia
+          ["streets",[-117.20,32.73],13], // San Diego
+          ["hybrid",[-77.65,24.20],9], // Bahamas
+          ["topo",[139.75,35.69],17], // Tokyo
+          ["national-geographic",[-74,40.74],12], // New York
+          ["oceans",[-160,30],3] // Pacific
+        ];    
+        return basemaps; 
+      }
+      return { 
+        mapLocations: mapLocations
+      }
+    });  
+    
+    define("app",["model", "dojo/dom", "dojo/on", "dojo/domReady!"], 
+      function(model,dom,on) {
+        "use strict"
+        var m = {
+          map: null,
+          index: 0,
+          mapLocations: null,
+          timerHandle: 0,
+          basemaps : [{btn: dom.byId("basemap0"),type:'gray'},
+            {btn:dom.byId("basemap1"), type:'streets'},
+            {btn:dom.byId("basemap2"), type:'hybrid'},
+            {btn:dom.byId("basemap3"), type:'topo'},
+            {btn:dom.byId("basemap4"), type:'national-geographic'},
+            {btn:dom.byId("basemap5"), type:'oceans'}
+            ],
+
+          init: function(mapRef) {
+            this.map = mapRef;
+            this.mapLocations = model.mapLocations;
+
+            function findBasemapType(btn) {
+              var length = m.basemaps.length;
+              for (var i=0; i < length; i++) {
+                if (btn.id == m.basemaps[i].btn.id) {
+                    return m.basemaps[i].type;
+                }
+              }
+            }
+
+            // setup handlers
+            for (var i=0; i< this.basemaps.length; i++) {
+              var basemapType = this.basemaps[i].type;
+              on(this.basemaps[i].btn, "click", function () {
+                  m.setBasemap(findBasemapType(this));  // check!
+                  //setButtonColors(this);
+                  m.setSelected(this);
+              });       
+            }
+            on(dom.byId("back"), "click", function() {
+              m.move(false);
+            });
+            on(dom.byId("forward"), "click", function() {
+              m.move(true);
+            });
+            on(dom.byId("tour"), "click", function() {
+              m.playTour();
+            });
+          },
+
+          setSelected:function(button) {
+            var elements = document.getElementsByClassName('btn btn-default');
+            for (var i = 0; i < elements.length; i++) {
+                elements[i].className = "btn btn-default";
+            }
+            var element = document.getElementsByClassName('btn btn-default active');
+            if (element)
+              element.className = "btn btn-default";
+            if (button)
+              button.className = "btn btn-default active";
+          },
+
+          setButtonColorsByType:function(type) {
+              var length = this.basemaps.length;
+              for (var i=0; i < length; i++) {
+                  if (type === this.basemaps[i].type) {
+                      m.setSelected(this.basemaps[i].btn);
+                  }
+              }
+          },
+
+          setBasemap:function(type) {
+            // Disable playmode
+            dom.byId("tour").checked = false;
+            clearInterval(this.timerHandle);
+            this.map.setBasemap(type);
+          },
+        
+          showBasemap:function (index,moveLocation) {
+            // set map and location
+            var mapType = this.mapLocations[this.index][0];
+            this.map.setBasemap(mapType);
+            this.setButtonColorsByType(mapType);
+            if (moveLocation)
+              this.map.centerAndZoom(this.mapLocations[this.index][1],this.mapLocations[this.index][2]);
+          },
+
+          move:function (forward) {
+            var i = this.index;
+            if (forward)
+              this.index = this.index < (this.mapLocations.length - 1) ? (this.index + 1) : 0;
+            else
+              this.index = this.index > 0 ? (this.index - 1) : 0;
+            if (i != this.index)
+              this.showBasemap(this.index,true);
+          },
+          playTour:function () {
+            if (dom.byId("tour").checked) {
+              // Start immediately
+              setTimeout(function() {
+                m.index = (m.index < (m.mapLocations.length - 1) ? (m.index + 1) : 0);
+                m.showBasemap(this.index,true);
+                },100);
+              // Start timer
+              m.timerHandle = setInterval ( function () { 
+                if (m.map.loaded) {
+                  m.index = (m.index < (m.mapLocations.length - 1) ? (m.index + 1) : 0);
+                  m.showBasemap(this.index, true);
+                }
+              }, 5000 );
+            } else {
+              clearInterval(m.timerHandle);
+            }
+          }
+        }
+        return m;
+      }
+    );
+
+    // Load map and app
+    require(["esri/map", "app", "dojo/domReady!"], 
+      function(Map, app, utils) {  
+        "use-strict"
+        var map = new Map("mapDiv",{ 
+          basemap: "gray",
+          center: [-100, 50],
+          zoom: 3
+        });
+        app.init(map);
+    }); 
+  </script>
+</head>
+  <body>
+    <div class="panel panel-primary panel-fixed">
+      <div class="panel-heading">
+        <h3 class="panel-title">Basemaps World Tour</h3>
+      </div>
+      <div class="panel-body">
+        <div class="btn-toolbar">
+          <div class="btn-group">
+            <button id="basemap0" class="btn btn-default">Gray</button>
+            <button id="basemap1" class="btn btn-default">Streets</button>
+            <button id="basemap2" class="btn btn-default">Satellite</button>
+          </div>
+        </div>
+        <div class="form-group btn-toolbar">
+          <div class="btn-group">
+            <button id="basemap3" class="btn btn-default">Topo</button>
+            <button id="basemap4" class="btn btn-default">Nat Geo</button>
+            <button id="basemap5" class="btn btn-default">Oceans</button>
+          </div>
+        </div>
+        <div class="form-inline form-group">
+         <button id="back" class="btn btn-sm"><span class="glyphicon glyphicon-chevron-left"></span></button>
+          <div class="checkbox">
+            <label><input type="checkbox" id="tour"> Start Tour</label>
+          </div>  
+         <button id="forward" class="btn btn-sm"><span class="glyphicon glyphicon-chevron-right"></span></button>  
+        </div>
+      </div>
+    </div>
+    <div id="mapDiv"></div>
+  </body>
+</html>

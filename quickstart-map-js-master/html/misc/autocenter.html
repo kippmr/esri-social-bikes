@@ -1,0 +1,137 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+  <title>Auto Center</title>
+  <link rel="shortcut icon" href="//esri.github.io/quickstart-map-js/images/favicon.ico">
+  <!-- ArcGIS API for JavaScript CSS-->
+  <link rel="stylesheet" href="//js.arcgis.com/3.10/js/esri/css/esri.css">
+  <!-- Web Framework CSS - Bootstrap (getbootstrap.com) and Bootstrap-map-js (github.com/esri/bootstrap-map-js) -->
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="//esri.github.io/bootstrap-map-js/src/css/bootstrapmap.css">
+  <style>
+    html, body, #mapDiv {
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+  
+  <!-- ArcGIS API for JavaScript library references -->
+  <script src="//js.arcgis.com/3.10compact"></script>
+  <script>
+    require(["esri/map",
+      "esri/InfoTemplate", 
+      "esri/geometry/Point", 
+      "esri/graphic", 
+      "esri/symbols/PictureMarkerSymbol",
+      "dojo/on", 
+      "dojo/dom", 
+      "dojo/domReady!"], 
+      function(Map, InfoTemplate, Point, Graphic, PictureMarkerSymbol, on, dom) {
+        "use strict"
+
+        // Create map
+        var map = new Map("mapDiv",{ 
+            basemap: "streets",
+            center: [-100, 53],
+            zoom: 3
+        });
+
+        // Set popup
+        var popup = map.infoWindow;
+        popup.highlight = false;
+        popup.titleInBody = false;
+        
+        
+        // Wire events
+        on(map, 'load', showGeolocation);
+
+        // Auto-recenter map when screen changes size
+        autoRecenter(map);
+
+        function showGeolocation() {
+          if (navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(showLocation, errorHandler);
+          } else {
+            alert("Sorry, your browser doesn't support geolocation.");      
+          }
+        }
+
+        function showLocation(position) {
+          clearGeolocationGraphics();
+          // Create a point
+          var pt = new Point(position.coords.longitude,position.coords.latitude);
+          // Create a symbol and pop-up template and add the graphic to the map
+          var symbol = new createPictureSymbol("//esri.github.io/quickstart-map-js/images/blue-pin.png", 0, 12, 13, 24);
+          var attributes = {"lat":pt.y.toFixed(2),"lon":pt.x.toFixed(2)};
+          var infoTemplate = new InfoTemplate("My Geolocation","Latitude: ${lat} <br/>Longitude: ${lon}");
+          var graphic = new Graphic(pt,symbol,attributes,infoTemplate);
+          map.graphics.add(graphic);
+          // Show pop-up
+          map.infoWindow.setTitle("My Geolocation");
+          map.infoWindow.setContent(graphic.getContent());
+          map.infoWindow.show(pt);
+          // Position the map
+          map.centerAndZoom(pt,13);
+        }
+
+        function errorHandler(err) {
+          if(err.code == 1) {
+            alert("Error: Access is denied!");
+          } else if ( err.code == 2) {
+            alert("Error: Position is unavailable!");
+          } else 
+            alert("Error: " + err);
+        }
+      
+        function clearGeolocationGraphics() {
+          map.infoWindow.hide();
+          map.graphics.clear();       
+        }
+
+        // Recenter the map when the window changes size
+        function autoRecenter(map) {
+          var resizeDelay = 100;
+          on(map, 'load', function (map) {
+            on(window, 'resize', map, map.resize);
+          });
+          on(map, 'resize',  function(extent, width, height) { 
+            map.__resizeCenter = map.extent.getCenter();
+            setTimeout(function() {
+              if (document.getElementById("useAutoCenter").checked) {
+                map.centerAt(map.__resizeCenter);                
+              }
+            }, resizeDelay);
+          });
+        }
+
+        function createPictureSymbol(url, xOffset, yOffset, xWidth, yHeight) {
+          return new PictureMarkerSymbol(
+          {
+            "angle": 0,
+            "xoffset": xOffset, "yoffset": yOffset, "type": "esriPMS",
+            "url": url,  
+            "contentType": "image/png",
+            "width":xWidth, "height": yHeight
+          });
+        }
+    });
+  </script>
+</head>
+<body>
+  <div class="panel panel-primary panel-fixed">
+    <div class="panel-heading">
+      <h3 class="panel-title">Auto-recenter Map</h3>
+    </div>
+    <div class="panel-body">
+      <p>Resize the browser or screen.</p>
+      <div class="checkbox"> 
+        <label><input id="useAutoCenter" type="checkbox" checked/> Use Auto Center</label> 
+      </div>
+    </div>
+  </div>
+  <div id="mapDiv"></div>
+</body>
+</html>
