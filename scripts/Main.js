@@ -1,65 +1,91 @@
 require([
       "esri/Map",
       "esri/views/MapView",
-      "esri/widgets/Locate",
-      "esri/widgets/Search",
-      "esri/layers/FeatureLayer",
+      "esri/Graphic",
+      "esri/layers/GraphicsLayer",
+      "esri/tasks/RouteTask",
+      "esri/tasks/support/RouteParameters",
+      "esri/tasks/support/FeatureSet",
+      "esri/symbols/SimpleMarkerSymbol",
+      "esri/symbols/SimpleLineSymbol",
+      "esri/Color",
+      "esri/core/urlUtils",
+      "dojo/on",
       "dojo/domReady!"
     ], function(
-      Map, MapView, Locate, Search, FeatureLayer
+      Map, MapView, Graphic, GraphicsLayer, RouteTask, RouteParameters,
+      FeatureSet, SimpleMarkerSymbol, SimpleLineSymbol, Color, urlUtils, on
     ) {
-      var map = new Map({
-        basemap: "streets",
+
+      // proxy the route requests to avoid prompt for log in
+      urlUtils.addProxyRule({
+        urlPrefix: "route.arcgis.com",
+        proxyUrl: "/sproxy/"
       });
 
+      // Point the URL to a valid route service
+      var routeTask = new RouteTask({
+        url: "https://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World"
+      });
+
+      // The stops and route result will be stored in this layer
+      var routeLyr = new GraphicsLayer();
+
+      // Setup the route parameters
+      var routeParams = new RouteParameters({
+        stops: new FeatureSet(),
+        outSpatialReference: { // autocasts as new SpatialReference()
+          wkid: 3857
+        }
+      });
+
+      // Define the symbology used to display the stops
+      var stopSymbol = new SimpleMarkerSymbol({
+        style: "cross",
+        size: 15,
+        outline: { // autocasts as new SimpleLineSymbol()
+          width: 4
+        }
+      });
+
+      // Define the symbology used to display the route
+      var routeSymbol = new SimpleLineSymbol({
+        color: [0, 0, 255, 0.5],
+        width: 5
+      });
+
+      var map = new Map({
+        basemap: "streets",
+        layers: [routeLyr] // Add the route layer to the map
+      });
       var view = new MapView({
-        container: "viewDiv",
-        map: map,
-        center: [-79.3860, 43.6543],
+        container: "viewDiv", // Reference to the scene div created in step 5
+        map: map, // Reference to the map object created before the scene
+        center: [-117.195, 34.057],
         zoom: 14
       });
 
-      var locateBtn = new Locate({
-        view: view
-      });
+      // Adds a graphic when the user clicks the map. If 2 or more points exist, route is solved.
+      on(view, "click", addStop);
 
-      // Add the locate widget to the top left corner of the view
-      view.ui.add(locateBtn, {
-        position: "top-left"
-      });
+      function addStop(event) {
+        // Add a point at the location of the map click
+        var stop = new Graphic({
+          geometry: event.mapPoint,
+          symbol: stopSymbol
+        });
+        routeLyr.add(stop);
 
-      var searchWidget = new Search({
-        view: view
-      });
-
-      // Add the search widget to the very top left corner of the view
-      view.ui.add(searchWidget, {
-        position: "top-right",
-        index: 0
-      });
-
-      searchWidget.on("select-result", function(event){
-        console.log("The selected search result: ", event);
-      });
-
-      // Carbon storage of trees in Warren Wilson College.
-      var featureLayer = new FeatureLayer({
-        url: "https://services.arcgis.com/3wgo1qnFL7YLB8lT/arcgis/rest/services/Bixi/FeatureServer/2"
-      });
-
-      map.add(featureLayer);
-
-      view.on("click", function(evt){
-        var screenPoint = {
-          x: evt.x,
-          y: evt.y
-        };
-        view.hitTest(screenPoint)
-          .then(function(response){
-             // do something with the result graphic
-             console.log(response);
-             console.log("clicked");
-             var graphic = response.results[0].graphic;
-          });
-    });
+        // Execute the route task if 2 or more stops are input
+        routeParams.stops.features.push(stop);
+        if (routeParams.stops.features.length >= 2) {
+          routeTask.solve(routeParams).then(showRoute);
+        }
+      }
+      // Adds the solved route to the map as a graphic
+      function showRoute(data) {
+        var routeResult = data.routeResults[0].route;
+        routeResult.symbol = routeSymbol;
+        routeLyr.add(routeResult);
+      }
     });
