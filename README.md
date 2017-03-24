@@ -1,7 +1,7 @@
 Social Bikes:
 =============
-An ESRI App Challenge 2017 Entry
---------------------------------
+A 2017 ECCE App Challenge Entry
+-------------------------------
 **Team Members**
 
 * Matthew Kipp
