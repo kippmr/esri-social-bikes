@@ -132,9 +132,9 @@ require([
   // Execute each time the "Measure Length" is clicked
   function measureDist() {
     var geom = view.popup.selectedFeature.geometry;
-    var distance = geometryEngine.geodesicLength(geom, "miles");
+    var distance = geometryEngine.geodesicLength(geom, "kilometers");
     distance = parseFloat(Math.round(distance * 100) / 100).toFixed(2);
-    view.popup.content = "<div style='background-color:DarkGray;color:white'> This route is " + distance + " miles long.</div>";
+    view.popup.content = "<div style='background-color:DarkGray;color:white'> This route is " + distance + " km long.</div>";
   };
   function setSrc() {
     var geom = view.popup.selectedFeature.geometry;
