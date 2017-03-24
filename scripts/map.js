@@ -23,7 +23,16 @@ require([
 ) {
   window.srclat = 0, window.srclon = 0, window.dstlat = 0, window.dstlon = 0, window.DST = null, window.SRC = null;
 
-  var routeLyr = new GraphicsLayer(); //where route will be stored
+  var measureAction = {
+    title: "Measure",
+    id: "dist-measure",
+    image: "http://free-icon-rainbow.com/i/icon_04809/icon_048090_256.jpg"
+  };
+  var template2 = {
+    title: "Distance to Travel",
+    actions: [measureAction]
+  };
+  var routeLyr = new GraphicsLayer(); 
   // Create the Map
   var map = new Map({
     basemap: "streets",
@@ -101,11 +110,16 @@ require([
     url: "https://services.arcgis.com/3wgo1qnFL7YLB8lT/arcgis/rest/services/Bixi_Test/FeatureServer/3",
     outFields: ["*"],
     renderer: linesRenderer
-    //opacity: 0.2
   });
   map.add(featureLayer2);
 
   // Execute each time the "Measure Length" is clicked
+  function measureDist() {
+    var geom = view.popup.selectedFeature.geometry;
+    var distance = geometryEngine.geodesicLength(geom, "miles");
+    distance = parseFloat(Math.round(distance * 100) / 100).toFixed(2);
+    view.popup.content = "<div style='background-color:DarkGray;color:white'> This route is " + distance + " miles long.</div>";
+  };
   function setSrc() {
     var geom = view.popup.selectedFeature.geometry;
     var distance = geometryEngine.geodesicLength(geom, "miles");
@@ -138,6 +152,8 @@ require([
       setSrc();
     } else if (event.action.id == "set-dst") {
       setDst();
+    } else if (event.action.id == "dist-measure") {
+      measureDist();
     }
   });
 
@@ -146,15 +162,8 @@ require([
   **************************************************************/
   // Point the URL to a valid route service
   var routeTask = new RouteTask({
-    url: "https://utility.arcgis.com/usrsvcs/servers/0d7cf5c7a6954ea8b64faa37b7d3b750/rest/services/World/Route/NAServer/Route_World"
+    url: "https://utility.arcgis.com/usrsvcs/servers/1fd1ee808e054e5fb3269abd300a06c4/rest/services/Test2/NAServer/Route"
   });
-  //route parameters
-  /*var routeParams = new RouteParameters({
-    stops: new FeatureSet(),
-    outSpatialReference: { // autocasts as new SpatialReference()
-      wkid: 3857
-    }
-  });*/
   // Define the symbology used to display the route
   var routeSymbol = new SimpleLineSymbol({
     color: [0, 0, 255, 0.5],
@@ -172,10 +181,10 @@ require([
     if (DST != null && SRC != null) {
       routeLyr.removeAll();
      var routeParams = new RouteParameters({
-    stops: new FeatureSet(),
-    outSpatialReference: { // autocasts as new SpatialReference()
+      stops: new FeatureSet(),
+      outSpatialReference: { // autocasts as new SpatialReference()
       wkid: 3857
-    }
+      }
   });    
       var stop1 = new Graphic({
         geometry: SRC,
@@ -200,6 +209,7 @@ require([
   function showRoute(data) {
       console.log("WE MADEIT");
     var routeResult = data.routeResults[0].route;
+    routeResult.popupTemplate = template2;
     routeResult.symbol = routeSymbol;
     routeLyr.add(routeResult);
   }
