@@ -18,6 +18,12 @@ In particular, the app will display all available bike hubs, where the user will
 The app is available via web browser at [kippmr.com/esri-social-bike](http://www.kippmr.com/esri-social-bikes/) and operates on mobile and desktop devices.
 Instructional video on using the app: [Using Social Bikes for Biking Around Toronto](https://youtu.be/3iMuzuwukKc)
 
+App Characteristics:
+--------------------
+Our app contains the location of all the Toronto Bike Share hubs in the available area along with basic information like hub name and capacity, found through Toronto Bike Sharing open data. The existing bike sharing app that we obtained this data from contains the locations of each hub and the number of bicycles and docks available, but does not show suggested routes for users or members to take from hub to hub.
+
+We have improved on this by creating a Toronto Bikeways network dataset by taking Toronto open transportation data and removing any roads or pathways that bikes are not permitted on, with priority routes based on designated bicycle infrastructure and recommended street routes. This was uploaded to an ESRI ArcGIS Server as a Network Analysis service, allowing us to generate routes through this Bikeways network. This allows us to find the closest origin hub to a user’s location and generate routes to any destination hub that only use bike-friendly routes, avoiding dangerous roads and optimizing their cycling experience. The cycling distance between the hubs is also calculated using the Measure tool and pops up on-screen.
+
 Data Sources:
 -------------
 * [Toronto Bike Share Hub Data](https://feeds.bikesharetoronto.com/stations/stations.xml)
