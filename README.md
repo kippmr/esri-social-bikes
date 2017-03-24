@@ -16,7 +16,7 @@ In particular, the app will display all available bike hubs, where the user will
 **Usage Instructions**:
 
 The app is available via web browser at [kippmr.com/esri-social-bike](http://www.kippmr.com/esri-social-bikes/) and operates on mobile and desktop devices.
-Instructional video on using the app: [Using Social Bikes for Biking Around Toronto]()
+Instructional video on using the app: [Using Social Bikes for Biking Around Toronto](https://youtu.be/3iMuzuwukKc)
 
 Data Sources:
 -------------
