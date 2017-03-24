@@ -34,4 +34,4 @@ Improvements:
 -------------
 By computing route with additional variables to base route preference (ie. slope gradient, traffic volumes, traffic lights, and turn frequencies) the app could more accurately display the optimal route.
 
-**Disclaimer**: *Social Bikes is not affiliated with any of the organisations or programs present in the app. The app was made strictly for educational purposes in conjunction with the 2017 ECCE App Challenge. This app is a prototype and all calculations are purely estimates. The app was tested on and works with Chrome and Firefox web browsers.
+**Disclaimer**: *Social Bikes is not affiliated with any of the organisations or programs present in the app. The app was made strictly for educational purposes in conjunction with the 2017 ECCE App Challenge. This app is a prototype and all calculations are purely estimates. The app was tested on and works with Chrome and Firefox web browsers.*
