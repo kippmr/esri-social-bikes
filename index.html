@@ -4,27 +4,30 @@
   <meta charset="utf-8">
   <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
   <meta name="description" content="Simple Social Bike Route">
-  <!-- 
+  <!--
   ArcGIS API for JavaScript, https://js.arcgis.com
   For more information about the widgets-locate sample, read the original sample description at developers.arcgis.com.
-  https://developers.arcgis.com/javascript/latest/widgets-locate/index.html  
+  https://developers.arcgis.com/javascript/latest/widgets-locate/index.html
   -->
   <title>Social Bike Route</title>
+  <link rel="stylesheet" href="https://esri.github.io/calcite-maps/dist/css/calcite-bootstrap.min-v0.2.css">
+  <link rel="stylesheet" href="https://esri.github.io/calcite-maps/dist/css/calcite-maps-arcgis-4.x.min-v0.2.css">
   <link rel="stylesheet" href="https://js.arcgis.com/4.3/esri/css/main.css">
-  <style>
-    html,
-    body,
-    #viewDiv {
-      padding: 0;
-      margin: 0;
-      height: 100%;
-      width: 100%;
-    }
-  </style>
+
   <script src="https://js.arcgis.com/4.3/"></script>
   <script src="scripts/map.js"></script>
 </head>
-<body>
-  <div id="viewDiv"></div>
+<body class = "calcite-nav-top">
+  <nav class="navbar calcite-navbar navbar-fixed-top calcite-text-light calcite-bg-dark">
+
+    <div class="calcite-title calcite-overflow-hidden">
+      <span class="calcite-title-main">&nbsp;&nbsp; Esri Social Bike Network</span>
+      <span class="calcite-title-divider hidden-xs"></span>
+      <span class="calcite-title-sub hidden-xs"></span>
+    </div>
+  </nav>
+  <div class="calcite-map calcite-map-absolute">
+      <div id="viewDiv"></div>
+  </div>
 </body>
 </html>
