@@ -9,7 +9,7 @@ An ESRI App Challenge 2017 Entry
 * Wei Lu
 * Jack You
 
-**Purpose**: To compliment the [Bike Share](https://www.bikesharetoronto.com/) program present in the City of Toronto by determining routes between bike hubs using only bike-friendly routes (no highways). As of creation of this app, the [bike share website](https://member.bikesharetoronto.com/stations) only displays available hubs. 
+**Purpose**: To compliment the [Bike Share](https://www.bikesharetoronto.com/) program present in the City of Toronto by determining routes between bike hubs using only bike-friendly routes (no highways). As of the 24th of March, the [bike share website](https://member.bikesharetoronto.com/stations) only displays available hubs. 
 
 In particular, the app will display all available bike hubs, where the user will select the start and end hubs, have a route automatically generated on bike-friendly paths giving higher priority to bikeways, and display the distance of the generated route.
 
@@ -28,7 +28,7 @@ Data Sources:
 Limits and Assumptions:
 -----------------------
 * Assumes that the bicycle count at a bike hub is always greater than zero due to working with static data, which leads to a limitation that the app is unable to report the correct number of bicycles at a bike hub. Solution: use dynamic data provided by Toronto rather than static.
-* The app currently operates in the Downtown Toronto / East York area due to the limitation of Bike Share Toronto bike hubs placed throughout the city. Solution: the application will update once more bike hubs are installed and recorded.
+* The app currently operates in the Downtown Toronto / East York area due to the limited availability of Bike Share Toronto bike hubs placed throughout the city. Solution: the application will update once more bike hubs are installed and recorded.
 
 Improvements:
 -------------
