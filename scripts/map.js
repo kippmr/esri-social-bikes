@@ -2,6 +2,7 @@ require([
   "esri/Map",
   "esri/layers/FeatureLayer",
   "esri/views/MapView",
+  "esri/widgets/Legend",
   "esri/geometry/geometryEngine",
   "esri/widgets/Locate",
   "esri/widgets/Search",
@@ -17,8 +18,8 @@ require([
   "esri/core/urlUtils",
   "dojo/domReady!"
 ], function(
-  Map, FeatureLayer, MapView, geometryEngine, Locate, Search, Graphic, GraphicsLayer, 
-  RouteTask, RouteParameters, FeatureSet, SimpleMarkerSymbol, SimpleLineSymbol, SimpleRenderer, Color, 
+  Map, FeatureLayer, MapView, Legend, geometryEngine, Locate, Search, Graphic, GraphicsLayer,
+  RouteTask, RouteParameters, FeatureSet, SimpleMarkerSymbol, SimpleLineSymbol, SimpleRenderer, Color,
   urlUtils, on
 ) {
   window.srclat = 0, window.srclon = 0, window.dstlat = 0, window.dstlon = 0, window.DST = null, window.SRC = null;
@@ -32,7 +33,7 @@ require([
     title: "Distance to Travel",
     actions: [measureAction]
   };
-  var routeLyr = new GraphicsLayer(); 
+  var routeLyr = new GraphicsLayer();
   // Create the Map
   var map = new Map({
     basemap: "streets",
@@ -47,13 +48,15 @@ require([
     zoom: 14
   });
 
+  view.padding.top = 50;
+
   var locateBtn = new Locate({ view: view});
   var searchWidget = new Search({ view: view});
 
   view.ui.add(locateBtn, {
     position: "top-left"
   });
-  view.ui.add(searchWidget, { 
+  view.ui.add(searchWidget, {
     position: "top-right",
     index: 0
   });
@@ -113,6 +116,19 @@ require([
   });
   map.add(featureLayer2);
 
+  view.then(function() {
+
+          var legend = new Legend({
+            view: view,
+            layerInfos: [{
+              layer: featureLayer,
+              title: "Bike Hub Locations"
+            }]
+          });
+
+          view.ui.add(legend, "top-right");
+        });
+
   // Execute each time the "Measure Length" is clicked
   function measureDist() {
     var geom = view.popup.selectedFeature.geometry;
@@ -127,7 +143,7 @@ require([
     srclat = view.popup.selectedFeature.attributes.X_cord
     srclon = view.popup.selectedFeature.attributes.Y_cord
     view.popup.content = view.popup.selectedFeature.attributes.name +
-    "<div style='background-color:DarkGray;color:white'> Source is set to " + 
+    "<div style='background-color:DarkGray;color:white'> Source is set to " +
     srclat + ", " + srclon + ".</div>";
     window.SRC = view.popup.location
     calcRoute();
@@ -139,7 +155,7 @@ require([
     dstlat = view.popup.selectedFeature.attributes.X_cord
     dstlon = view.popup.selectedFeature.attributes.Y_cord
     view.popup.content = view.popup.selectedFeature.attributes.name +
-    "<div style='background-color:DarkGray;color:white'> Destination is set to " + 
+    "<div style='background-color:DarkGray;color:white'> Destination is set to " +
     dstlat + ", " + dstlon + ".</div>";
     window.DST = view.popup.location;
     calcRoute();
@@ -185,7 +201,7 @@ require([
       outSpatialReference: { // autocasts as new SpatialReference()
       wkid: 3857
       }
-  });    
+  });
       var stop1 = new Graphic({
         geometry: SRC,
         symbol: stopSymbol
