@@ -17,15 +17,9 @@ require([
       FeatureSet, SimpleMarkerSymbol, SimpleLineSymbol, Color, urlUtils, on
     ) {
 
-      // proxy the route requests to avoid prompt for log in
-      urlUtils.addProxyRule({
-        urlPrefix: "route.arcgis.com",
-        proxyUrl: "/sproxy/"
-      });
-
       // Point the URL to a valid route service
       var routeTask = new RouteTask({
-        url: "https://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World"
+        url: "https://services.arcgis.com/3wgo1qnFL7YLB8lT/arcgis/rest/services/Bixi_Test/FeatureServer/0"
       });
 
       // The stops and route result will be stored in this layer
@@ -61,8 +55,8 @@ require([
       var view = new MapView({
         container: "viewDiv", // Reference to the scene div created in step 5
         map: map, // Reference to the map object created before the scene
-        center: [-117.195, 34.057],
-        zoom: 14
+    center: [-79.3860, 43.6543],
+    zoom: 14
       });
 
       // Adds a graphic when the user clicks the map. If 2 or more points exist, route is solved.

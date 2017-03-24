@@ -5,9 +5,17 @@ require([
   "esri/geometry/geometryEngine",
   "esri/widgets/Locate",
   "esri/widgets/Search",
+  "esri/Graphic",
+  "esri/layers/GraphicsLayer",
+  "esri/tasks/RouteTask",
+  "esri/tasks/support/RouteParameters",
+  "esri/tasks/support/FeatureSet",
+  "esri/core/urlUtils",
+  "dojo/on",
   "dojo/domReady!"
 ], function(
-  Map, FeatureLayer, MapView, geometryEngine, Locate, Search
+  Map, FeatureLayer, MapView, geometryEngine, Locate, Search, Graphic, GraphicsLayer, 
+  RouteTask, urlUtils, 
 ) {
   window.srclat = 0, window.srclon = 0, window.dstlat = 0, window.dstlon = 0;
   // Create the Map
@@ -63,7 +71,7 @@ require([
   };
 
   featureLayer = new FeatureLayer({
-    url: "https://services.arcgis.com/3wgo1qnFL7YLB8lT/arcgis/rest/services/Bixi/FeatureServer/2",
+    url: "https://services.arcgis.com/3wgo1qnFL7YLB8lT/arcgis/rest/services/Bixi_Test/FeatureServer/2",
     outFields: ["*"],
     popupTemplate: template
   });
@@ -96,12 +104,29 @@ require([
     // Execute the measureThis() function if the measure-this action is clicked
     if (event.action.id == "set-src") {
       setSrc();
-      console.log(srclat);
-      console.log(srclon);
     } else if (event.action.id == "set-dst") {
       setDst();
-      console.log(dstlat);
-      console.log(dstlon);
     }
   });
+
+  /*************************************************************
+  * Plot route based on src and dst's lat and lon.
+  **************************************************************
+  // Point the URL to a valid route service
+  var routeTask = new RouteTask({
+    url: "https://services.arcgis.com/3wgo1qnFL7YLB8lT/arcgis/rest/services/Bixi_Test/FeatureServer/0"
+  });
+  var routeLyr = new GraphicsLayer(); //where route will be stored
+  //route parameters
+  var routeParams = new RouteParameters({
+    stops: new FeatureSet(),
+    outSpatialReference: { // autocasts as new SpatialReference()
+      wkid: 3857
+    }
+  });
+  // Define the symbology used to display the route
+  var routeSymbol = new SimpleLineSymbol({
+    color: [0, 0, 255, 0.5],
+    width: 5
+  });**/
 });
