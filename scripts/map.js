@@ -10,17 +10,23 @@ require([
   "esri/tasks/RouteTask",
   "esri/tasks/support/RouteParameters",
   "esri/tasks/support/FeatureSet",
+  "esri/symbols/SimpleMarkerSymbol",
+  "esri/symbols/SimpleLineSymbol",
+  "esri/Color",
   "esri/core/urlUtils",
-  "dojo/on",
   "dojo/domReady!"
 ], function(
   Map, FeatureLayer, MapView, geometryEngine, Locate, Search, Graphic, GraphicsLayer, 
-  RouteTask, urlUtils, 
+  RouteTask, RouteParameters, FeatureSet, SimpleMarkerSymbol, SimpleLineSymbol, Color, 
+  urlUtils, on
 ) {
-  window.srclat = 0, window.srclon = 0, window.dstlat = 0, window.dstlon = 0;
+  window.srclat = 0, window.srclon = 0, window.dstlat = 0, window.dstlon = 0, window.DST = null, window.SRC = null;
+
+  var routeLyr = new GraphicsLayer(); //where route will be stored
   // Create the Map
   var map = new Map({
-    basemap: "streets"
+    basemap: "streets",
+    layers: [routeLyr] // Add the route layer to the map
   });
 
   // Create the MapView
@@ -87,6 +93,8 @@ require([
     view.popup.content = view.popup.selectedFeature.attributes.name +
     "<div style='background-color:DarkGray;color:white'> Source is set to " + 
     srclat + ", " + srclon + ".</div>";
+    window.SRC = view.popup.location
+    calcRoute();
   }
   function setDst() {
     var geom = view.popup.selectedFeature.geometry;
@@ -97,6 +105,8 @@ require([
     view.popup.content = view.popup.selectedFeature.attributes.name +
     "<div style='background-color:DarkGray;color:white'> Destination is set to " + 
     dstlat + ", " + dstlon + ".</div>";
+    window.DST = view.popup.location;
+    calcRoute();
   }
 
   // Event handler that fires each time an action is clicked.
@@ -111,12 +121,11 @@ require([
 
   /*************************************************************
   * Plot route based on src and dst's lat and lon.
-  **************************************************************
+  **************************************************************/
   // Point the URL to a valid route service
   var routeTask = new RouteTask({
-    url: "https://services.arcgis.com/3wgo1qnFL7YLB8lT/arcgis/rest/services/Bixi_Test/FeatureServer/0"
+    url: "https://utility.arcgis.com/usrsvcs/servers/0d7cf5c7a6954ea8b64faa37b7d3b750/rest/services/World/Route/NAServer/Route_World"
   });
-  var routeLyr = new GraphicsLayer(); //where route will be stored
   //route parameters
   var routeParams = new RouteParameters({
     stops: new FeatureSet(),
@@ -128,5 +137,41 @@ require([
   var routeSymbol = new SimpleLineSymbol({
     color: [0, 0, 255, 0.5],
     width: 5
-  });**/
+  });
+  // Define the symbology used to display the stops
+  var stopSymbol = new SimpleMarkerSymbol({
+    style: "cross",
+    size: 15,
+    outline: { // autocasts as new SimpleLineSymbol()
+      width: 4
+    }
+  });
+  function calcRoute() {
+    if (DST != null && SRC != null) {    
+      var stop1 = new Graphic({
+        geometry: SRC,
+        symbol: stopSymbol
+      });
+      var stop2 = new Graphic({
+        geometry: DST,
+        symbol: stopSymbol
+      });
+      routeParams.stops.features.push(stop1);
+      routeParams.stops.features.push(stop2);
+      // Add a point at the location of the map click
+
+      routeLyr.add(stop1);
+      routeLyr.add(stop2);
+      //execute route
+      routeTask.solve(routeParams).then(showRoute);
+    }
+  }
+
+  // Adds the solved route to the map as a graphic
+  function showRoute(data) {
+      console.log("WE MADEIT");
+    var routeResult = data.routeResults[0].route;
+    routeResult.symbol = routeSymbol;
+    routeLyr.add(routeResult);
+  }
 });
