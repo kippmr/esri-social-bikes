@@ -12,12 +12,13 @@ require([
   "esri/tasks/support/FeatureSet",
   "esri/symbols/SimpleMarkerSymbol",
   "esri/symbols/SimpleLineSymbol",
+  "esri/renderers/SimpleRenderer",
   "esri/Color",
   "esri/core/urlUtils",
   "dojo/domReady!"
 ], function(
   Map, FeatureLayer, MapView, geometryEngine, Locate, Search, Graphic, GraphicsLayer, 
-  RouteTask, RouteParameters, FeatureSet, SimpleMarkerSymbol, SimpleLineSymbol, Color, 
+  RouteTask, RouteParameters, FeatureSet, SimpleMarkerSymbol, SimpleLineSymbol, SimpleRenderer, Color, 
   urlUtils, on
 ) {
   window.srclat = 0, window.srclon = 0, window.dstlat = 0, window.dstlon = 0, window.DST = null, window.SRC = null;
@@ -75,13 +76,34 @@ require([
     content: "{name}",
     actions: [srcAction, dstAction],
   };
-
+  var linesRenderer = new SimpleRenderer({
+    symbol: new SimpleLineSymbol({
+      width: "2px",
+      color: "black",
+      style: "short-dash-dot-dot"
+    })
+  });
+  var pointsRenderer = new SimpleRenderer({
+    symbol: new SimpleMarkerSymbol({
+      size: 10,
+      color: [0,127,255, 0.8],
+      style: "diamond"
+    })
+  });
   featureLayer = new FeatureLayer({
     url: "https://services.arcgis.com/3wgo1qnFL7YLB8lT/arcgis/rest/services/Bixi_Test/FeatureServer/2",
     outFields: ["*"],
-    popupTemplate: template
+    popupTemplate: template,
+    renderer: pointsRenderer
   });
   map.add(featureLayer);
+  featureLayer2 = new FeatureLayer({
+    url: "https://services.arcgis.com/3wgo1qnFL7YLB8lT/arcgis/rest/services/Bixi_Test/FeatureServer/3",
+    outFields: ["*"],
+    renderer: linesRenderer
+    //opacity: 0.2
+  });
+  map.add(featureLayer2);
 
   // Execute each time the "Measure Length" is clicked
   function setSrc() {
@@ -127,12 +149,12 @@ require([
     url: "https://utility.arcgis.com/usrsvcs/servers/0d7cf5c7a6954ea8b64faa37b7d3b750/rest/services/World/Route/NAServer/Route_World"
   });
   //route parameters
-  var routeParams = new RouteParameters({
+  /*var routeParams = new RouteParameters({
     stops: new FeatureSet(),
     outSpatialReference: { // autocasts as new SpatialReference()
       wkid: 3857
     }
-  });
+  });*/
   // Define the symbology used to display the route
   var routeSymbol = new SimpleLineSymbol({
     color: [0, 0, 255, 0.5],
@@ -147,7 +169,14 @@ require([
     }
   });
   function calcRoute() {
-    if (DST != null && SRC != null) {    
+    if (DST != null && SRC != null) {
+      routeLyr.removeAll();
+     var routeParams = new RouteParameters({
+    stops: new FeatureSet(),
+    outSpatialReference: { // autocasts as new SpatialReference()
+      wkid: 3857
+    }
+  });    
       var stop1 = new Graphic({
         geometry: SRC,
         symbol: stopSymbol
